@@ -3,78 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Habit Tracker & Journal</title>
+  <title>Diary App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 14px;
+      padding: 20px;
       background-color: #f9f9f9;
       color: #333;
     }
-    h1, h2 {
-      text-align: center;
-    }
-    .journal-widget {
-      margin-top: 20px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #fff;
-    }
-    .journal-header {
+    .diary-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
-    .journal-header input, .journal-header select {
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    .journal-header button {
-      padding: 8px 16px;
+    .diary-header button {
+      padding: 5px 10px;
       background-color: #A17E89;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-    .journal-header button:hover {
+    .diary-header button:hover {
       background-color: #8c6375;
     }
-    .journal-list {
-      margin-top: 10px;
-    }
-    .journal-list button {
-      display: block;
-      width: 100%;
-      margin-bottom: 5px;
-      text-align: left;
-      padding: 10px;
-      background-color: #f1f1f1;
-      border: none;
+    .diary {
+      margin: 0 auto;
+      max-width: 600px;
+      border: 1px solid #ddd;
       border-radius: 5px;
-      cursor: pointer;
+      background-color: white;
+      padding: 20px;
     }
-    .journal-list button:hover {
-      background-color: #ddd;
-    }
-    .journal-entry {
-      margin-top: 20px;
-      display: none;
-    }
-    .journal-entry textarea {
+    .diary-title {
       width: 100%;
-      height: 150px;
       padding: 10px;
+      font-size: 18px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .diary-content {
+      width: 100%;
+      height: 300px;
+      padding: 10px;
+      font-size: 16px;
       border: 1px solid #ddd;
       border-radius: 5px;
       resize: none;
     }
-    .journal-entry button {
-      margin-top: 10px;
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .navigation button {
       padding: 10px 20px;
       background-color: #A17E89;
       color: white;
@@ -82,140 +67,169 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .journal-entry button:hover {
+    .navigation button:hover {
       background-color: #8c6375;
+    }
+    .calendar {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      z-index: 1000;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .calendar table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .calendar th, .calendar td {
+      width: 14%;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+    .calendar th {
+      background-color: #f1f1f1;
+    }
+    .calendar td:hover {
+      background-color: #A17E89;
+      color: white;
+    }
+    .close-calendar {
+      float: right;
+      cursor: pointer;
+      font-size: 18px;
+      color: #A17E89;
     }
   </style>
 </head>
 <body>
-  <h1>Habit Tracker & Journal</h1>
-  <div class="journal-widget">
-    <div class="journal-header">
-      <input type="text" id="journal-title" placeholder="Enter page title">
-      <select id="journal-category">
-        <option value="Gratitude">Gratitude</option>
-        <option value="Shadow Work">Shadow Work</option>
-        <option value="Prompt">Prompt</option>
-        <option value="Manifesting">Manifesting</option>
-      </select>
-      <button id="create-page">Create Page</button>
-    </div>
-    <button id="view-archive">View Archive</button>
-    <div class="journal-list" id="journal-list">
-      <!-- Pages will be dynamically loaded here -->
-    </div>
-    <div class="journal-entry" id="journal-entry">
-      <textarea id="journal-content" placeholder="Write your thoughts here..."></textarea>
-      <button id="save-entry">Save Entry</button>
-    </div>
-    <div class="journal-archive" id="journal-archive" style="display: none;">
-      <h2>Journal Archive</h2>
-      <div id="archive-list"></div>
-    </div>
+  <div class="diary-header">
+    <h1>Diary</h1>
+    <button id="open-archive">Archive</button>
   </div>
-  <script src="journal.js">const createPageButton = document.getElementById("create-page");
-const journalTitleInput = document.getElementById("journal-title");
-const journalCategorySelect = document.getElementById("journal-category");
-const journalList = document.getElementById("journal-list");
-const journalEntry = document.getElementById("journal-entry");
-const journalContent = document.getElementById("journal-content");
-const saveEntryButton = document.getElementById("save-entry");
-const viewArchiveButton = document.getElementById("view-archive");
-const journalArchive = document.getElementById("journal-archive");
-const archiveList = document.getElementById("archive-list");
+  <div class="diary">
+    <p id="current-date" style="text-align: right; font-size: 14px;"></p>
+    <input type="text" id="diary-title" class="diary-title" placeholder="Title">
+    <textarea id="diary-content" class="diary-content" placeholder="Write your thoughts..."></textarea>
+  </div>
+  <div class="navigation">
+    <button id="prev-day">❮ Previous</button>
+    <button id="next-day">Next ❯</button>
+  </div>
 
-// LocalStorage key
-const JOURNAL_KEY = "journalPages";
+  <!-- Archive Modal -->
+  <div class="calendar" id="calendar">
+    <span class="close-calendar" id="close-calendar">✖</span>
+    <h2>Select a Date</h2>
+    <table id="calendar-table"></table>
+  </div>
 
-// Load pages from localStorage
-function loadPages() {
-  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
-  journalList.innerHTML = "";
-  Object.keys(pages).forEach(key => {
-    const button = document.createElement("button");
-    button.textContent = `${pages[key].title} (${pages[key].date})`;
-    button.addEventListener("click", () => openPage(key, pages[key]));
-    journalList.appendChild(button);
-  });
-}
+  <script>
+    // DOM Elements
+    const currentDateElement = document.getElementById("current-date");
+    const diaryTitle = document.getElementById("diary-title");
+    const diaryContent = document.getElementById("diary-content");
+    const prevDayButton = document.getElementById("prev-day");
+    const nextDayButton = document.getElementById("next-day");
+    const openArchiveButton = document.getElementById("open-archive");
+    const closeCalendarButton = document.getElementById("close-calendar");
+    const calendar = document.getElementById("calendar");
+    const calendarTable = document.getElementById("calendar-table");
 
-// Create a new page
-createPageButton.addEventListener("click", () => {
-  const title = journalTitleInput.value.trim();
-  const category = journalCategorySelect.value;
-  const date = new Date().toLocaleDateString();
+    // State
+    let currentDate = new Date();
 
-  if (title === "") {
-    alert("Please enter a title for your page.");
-    return;
-  }
+    // Utility functions
+    const formatDate = (date) => {
+      return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    };
 
-  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
-  const id = `${title}-${date}`.replace(/\s+/g, "_");
+    const savePage = () => {
+      const title = diaryTitle.value;
+      const content = diaryContent.value;
+      const dateKey = formatDate(currentDate);
+      const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
+      savedPages[dateKey] = { title, content };
+      localStorage.setItem("diaryPages", JSON.stringify(savedPages));
+    };
 
-  if (pages[id]) {
-    alert("A page with this title already exists for today.");
-    return;
-  }
+    const loadPage = () => {
+      const dateKey = formatDate(currentDate);
+      const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
+      const page = savedPages[dateKey] || { title: "", content: "" };
+      diaryTitle.value = page.title;
+      diaryContent.value = page.content;
+      currentDateElement.textContent = `Date: ${currentDate.toDateString()}`;
+    };
 
-  pages[id] = { title, category, date, content: "" };
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(pages));
-  journalTitleInput.value = "";
-  loadPages();
-});
+    const generateCalendar = () => {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-// Open an existing page
-function openPage(id, page) {
-  journalEntry.style.display = "block";
-  journalContent.value = page.content;
-  journalEntry.dataset.currentId = id;
-}
+      calendarTable.innerHTML = "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>";
+      let row = "<tr>";
 
-// Save the current entry
-saveEntryButton.addEventListener("click", () => {
-  const id = journalEntry.dataset.currentId;
-  const content = journalContent.value;
+      for (let i = 0; i < firstDayIndex; i++) {
+        row += "<td></td>";
+      }
 
-  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
-  if (pages[id]) {
-    pages[id].content = content;
-    localStorage.setItem(JOURNAL_KEY, JSON.stringify(pages));
-    alert("Entry saved!");
-    journalEntry.style.display = "none";
-    journalContent.value = "";
-  }
-});
+      for (let day = 1; day <= daysInMonth; day++) {
+        const currentDay = new Date(year, month, day);
+        row += `<td>${day}</td>`;
+        if ((firstDayIndex + day) % 7 === 0) {
+          row += "</tr><tr>";
+        }
+      }
 
-// View the archive
-viewArchiveButton.addEventListener("click", () => {
-  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
-  journalArchive.style.display = "block";
-  archiveList.innerHTML = "";
+      row += "</tr>";
+      calendarTable.innerHTML += row;
 
-  // Group pages by month
-  const groupedByMonth = {};
-  Object.keys(pages).forEach(id => {
-    const month = pages[id].date.split("/")[1]; // Extract month from date
-    if (!groupedByMonth[month]) groupedByMonth[month] = [];
-    groupedByMonth[month].push(pages[id]);
-  });
+      // Add click events to each day
+      calendarTable.querySelectorAll("td").forEach((cell) => {
+        if (cell.textContent) {
+          cell.addEventListener("click", () => {
+            currentDate = new Date(year, month, cell.textContent);
+            loadPage();
+            calendar.style.display = "none";
+          });
+        }
+      });
+    };
 
-  // Display months
-  Object.keys(groupedByMonth).forEach(month => {
-    const monthDiv = document.createElement("div");
-    monthDiv.innerHTML = `<h3>Month: ${month}</h3>`;
-    groupedByMonth[month].forEach(page => {
-      const pageButton = document.createElement("button");
-      pageButton.textContent = `${page.title} (${page.category})`;
-      pageButton.addEventListener("click", () => openPage(page.title, page));
-      monthDiv.appendChild(pageButton);
+    // Event Listeners
+    prevDayButton.addEventListener("click", () => {
+      savePage();
+      currentDate.setDate(currentDate.getDate() - 1);
+      loadPage();
     });
-    archiveList.appendChild(monthDiv);
-  });
-});
 
-// Initialize the widget
-loadPages();
-</script>
+    nextDayButton.addEventListener("click", () => {
+      savePage();
+      currentDate.setDate(currentDate.getDate() + 1);
+      loadPage();
+    });
+
+    openArchiveButton.addEventListener("click", () => {
+      generateCalendar();
+      calendar.style.display = "block";
+    });
+
+    closeCalendarButton.addEventListener("click", () => {
+      calendar.style.display = "none";
+    });
+
+    // Initialize
+    loadPage();
+  </script>
 </body>
 </html>
