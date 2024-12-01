@@ -1,4 +1,4 @@
-Journal
+
 
 
 <!DOCTYPE html>
@@ -116,6 +116,23 @@ Journal
       font-size: 18px;
       color: #A17E89;
     }
+    .save-button {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.save-button button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.save-button button:hover {
+  background-color: #45a049;
+}
   </style>
 </head>
 <body>
@@ -132,7 +149,9 @@ Journal
     <button id="prev-day">❮ Previous</button>
     <button id="next-day">Next ❯</button>
   </div>
-
+<div class="save-button">
+  <button id="save-page">Save</button>
+</div>
   <!-- Archive Modal -->
   <div class="calendar" id="calendar">
     <div class="calendar-header">
@@ -259,6 +278,16 @@ Journal
     });
 
     loadPage();
+
+    document.getElementById("save-page").addEventListener("click", () => {
+  const title = diaryTitle.value;
+  const content = diaryContent.value;
+  const dateKey = formatDate(currentDate);
+  const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
+  savedPages[dateKey] = { title, content };
+  localStorage.setItem("diaryPages", JSON.stringify(savedPages));
+  alert("Page saved!");
+});
   </script>
 </body>
 </html>
