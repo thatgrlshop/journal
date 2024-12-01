@@ -102,6 +102,11 @@
       background-color: #A17E89;
       color: white;
     }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .close-calendar {
       float: right;
       cursor: pointer;
@@ -127,13 +132,16 @@
 
   <!-- Archive Modal -->
   <div class="calendar" id="calendar">
-    <span class="close-calendar" id="close-calendar">✖</span>
-    <h2>Select a Date</h2>
+    <div class="calendar-header">
+      <button id="prev-month">❮</button>
+      <h2 id="calendar-month"></h2>
+      <button id="next-month">❯</button>
+    </div>
     <table id="calendar-table"></table>
+    <span class="close-calendar" id="close-calendar">✖</span>
   </div>
 
   <script>
-    // DOM Elements
     const currentDateElement = document.getElementById("current-date");
     const diaryTitle = document.getElementById("diary-title");
     const diaryContent = document.getElementById("diary-content");
@@ -143,13 +151,21 @@
     const closeCalendarButton = document.getElementById("close-calendar");
     const calendar = document.getElementById("calendar");
     const calendarTable = document.getElementById("calendar-table");
+    const calendarMonth = document.getElementById("calendar-month");
+    const prevMonthButton = document.getElementById("prev-month");
+    const nextMonthButton = document.getElementById("next-month");
 
-    // State
     let currentDate = new Date();
+    let currentCalendarDate = new Date();
 
-    // Utility functions
     const formatDate = (date) => {
-      return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+      return date.toISOString().split("T")[0];
+    };
+
+    const updateCalendarMonth = () => {
+      const month = currentCalendarDate.toLocaleString("default", { month: "long" });
+      const year = currentCalendarDate.getFullYear();
+      calendarMonth.textContent = `${month} ${year}`;
     };
 
     const savePage = () => {
@@ -171,8 +187,8 @@
     };
 
     const generateCalendar = () => {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
+      const year = currentCalendarDate.getFullYear();
+      const month = currentCalendarDate.getMonth();
       const firstDayIndex = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -194,7 +210,6 @@
       row += "</tr>";
       calendarTable.innerHTML += row;
 
-      // Add click events to each day
       calendarTable.querySelectorAll("td").forEach((cell) => {
         if (cell.textContent) {
           cell.addEventListener("click", () => {
@@ -206,7 +221,6 @@
       });
     };
 
-    // Event Listeners
     prevDayButton.addEventListener("click", () => {
       savePage();
       currentDate.setDate(currentDate.getDate() - 1);
@@ -220,6 +234,7 @@
     });
 
     openArchiveButton.addEventListener("click", () => {
+      updateCalendarMonth();
       generateCalendar();
       calendar.style.display = "block";
     });
@@ -228,7 +243,18 @@
       calendar.style.display = "none";
     });
 
-    // Initialize
+    prevMonthButton.addEventListener("click", () => {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+      updateCalendarMonth();
+      generateCalendar();
+    });
+
+    nextMonthButton.addEventListener("click", () => {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+      updateCalendarMonth();
+      generateCalendar();
+    });
+
     loadPage();
   </script>
 </body>
