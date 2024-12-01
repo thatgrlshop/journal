@@ -1,3 +1,6 @@
+Journal
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,21 +57,6 @@
       border-radius: 5px;
       resize: none;
     }
-    .save-button {
-      text-align: center;
-      margin-top: 10px;
-    }
-    .save-button button {
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .save-button button:hover {
-      background-color: #45a049;
-    }
     .navigation {
       display: flex;
       justify-content: space-between;
@@ -117,6 +105,17 @@
       background-color: #A17E89;
       color: white;
     }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .close-calendar {
+      float: right;
+      cursor: pointer;
+      font-size: 18px;
+      color: #A17E89;
+    }
   </style>
 </head>
 <body>
@@ -129,95 +128,137 @@
     <input type="text" id="diary-title" class="diary-title" placeholder="Title">
     <textarea id="diary-content" class="diary-content" placeholder="Write your thoughts..."></textarea>
   </div>
-  <div class="save-button">
-    <button id="save-page">Save</button>
-  </div>
   <div class="navigation">
     <button id="prev-day">❮ Previous</button>
     <button id="next-day">Next ❯</button>
   </div>
+
+  <!-- Archive Modal -->
   <div class="calendar" id="calendar">
-    <h2>Archive</h2>
-    <table id="calendar-table">
-      <!-- Calendar will be dynamically generated -->
-    </table>
-    <button id="close-calendar">Close</button>
+    <div class="calendar-header">
+      <button id="prev-month">❮</button>
+      <h2 id="calendar-month"></h2>
+      <button id="next-month">❯</button>
+    </div>
+    <table id="calendar-table"></table>
+    <span class="close-calendar" id="close-calendar">✖</span>
   </div>
 
   <script>
+    const currentDateElement = document.getElementById("current-date");
     const diaryTitle = document.getElementById("diary-title");
     const diaryContent = document.getElementById("diary-content");
-    const currentDateDisplay = document.getElementById("current-date");
+    const prevDayButton = document.getElementById("prev-day");
+    const nextDayButton = document.getElementById("next-day");
+    const openArchiveButton = document.getElementById("open-archive");
+    const closeCalendarButton = document.getElementById("close-calendar");
     const calendar = document.getElementById("calendar");
     const calendarTable = document.getElementById("calendar-table");
+    const calendarMonth = document.getElementById("calendar-month");
+    const prevMonthButton = document.getElementById("prev-month");
+    const nextMonthButton = document.getElementById("next-month");
+
     let currentDate = new Date();
+    let currentCalendarDate = new Date();
 
-    function formatDate(date) {
-      return date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
-    }
+    const formatDate = (date) => {
+      return date.toISOString().split("T")[0];
+    };
 
-    function loadPage(date) {
-      const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
-      const page = savedPages[date] || { title: "", content: "" };
-      diaryTitle.value = page.title;
-      diaryContent.value = page.content;
-    }
+    const updateCalendarMonth = () => {
+      const month = currentCalendarDate.toLocaleString("default", { month: "long" });
+      const year = currentCalendarDate.getFullYear();
+      calendarMonth.textContent = `${month} ${year}`;
+    };
 
-    function updateDateDisplay() {
-      currentDateDisplay.textContent = formatDate(currentDate);
-    }
-
-    document.getElementById("save-page").addEventListener("click", () => {
+    const savePage = () => {
       const title = diaryTitle.value;
       const content = diaryContent.value;
       const dateKey = formatDate(currentDate);
       const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
       savedPages[dateKey] = { title, content };
       localStorage.setItem("diaryPages", JSON.stringify(savedPages));
-      alert("Page saved!");
-    });
+    };
 
-    document.getElementById("prev-day").addEventListener("click", () => {
+    const loadPage = () => {
+      const dateKey = formatDate(currentDate);
+      const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
+      const page = savedPages[dateKey] || { title: "", content: "" };
+      diaryTitle.value = page.title;
+      diaryContent.value = page.content;
+      currentDateElement.textContent = `Date: ${currentDate.toDateString()}`;
+    };
+
+    const generateCalendar = () => {
+      const year = currentCalendarDate.getFullYear();
+      const month = currentCalendarDate.getMonth();
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      calendarTable.innerHTML = "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>";
+      let row = "<tr>";
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        row += "<td></td>";
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const currentDay = new Date(year, month, day);
+        row += `<td>${day}</td>`;
+        if ((firstDayIndex + day) % 7 === 0) {
+          row += "</tr><tr>";
+        }
+      }
+
+      row += "</tr>";
+      calendarTable.innerHTML += row;
+
+      calendarTable.querySelectorAll("td").forEach((cell) => {
+        if (cell.textContent) {
+          cell.addEventListener("click", () => {
+            currentDate = new Date(year, month, cell.textContent);
+            loadPage();
+            calendar.style.display = "none";
+          });
+        }
+      });
+    };
+
+    prevDayButton.addEventListener("click", () => {
+      savePage();
       currentDate.setDate(currentDate.getDate() - 1);
-      updateDateDisplay();
-      loadPage(formatDate(currentDate));
+      loadPage();
     });
 
-    document.getElementById("next-day").addEventListener("click", () => {
+    nextDayButton.addEventListener("click", () => {
+      savePage();
       currentDate.setDate(currentDate.getDate() + 1);
-      updateDateDisplay();
-      loadPage(formatDate(currentDate));
+      loadPage();
     });
 
-    document.getElementById("open-archive").addEventListener("click", () => {
-      calendar.style.display = "block";
+    openArchiveButton.addEventListener("click", () => {
+      updateCalendarMonth();
       generateCalendar();
+      calendar.style.display = "block";
     });
 
-    document.getElementById("close-calendar").addEventListener("click", () => {
+    closeCalendarButton.addEventListener("click", () => {
       calendar.style.display = "none";
     });
 
-    function generateCalendar() {
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth();
-      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-      calendarTable.innerHTML = "<tr>" + ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => `<th>${d}</th>`).join("") + "</tr>";
-      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-      let row = "<tr>" + "<td></td>".repeat(firstDay);
+    prevMonthButton.addEventListener("click", () => {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+      updateCalendarMonth();
+      generateCalendar();
+    });
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        row += `<td>${day}</td>`;
-        if ((day + firstDay) % 7 === 0) {
-          calendarTable.innerHTML += row + "</tr>";
-          row = "<tr>";
-        }
-      }
-      calendarTable.innerHTML += row + "</tr>";
-    }
+    nextMonthButton.addEventListener("click", () => {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+      updateCalendarMonth();
+      generateCalendar();
+    });
 
-    updateDateDisplay();
-    loadPage(formatDate(currentDate));
+    loadPage();
   </script>
 </body>
 </html>
