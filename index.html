@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker & Journal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 14px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .journal-widget {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+    .journal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .journal-header input, .journal-header select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .journal-header button {
+      padding: 8px 16px;
+      background-color: #A17E89;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .journal-header button:hover {
+      background-color: #8c6375;
+    }
+    .journal-list {
+      margin-top: 10px;
+    }
+    .journal-list button {
+      display: block;
+      width: 100%;
+      margin-bottom: 5px;
+      text-align: left;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .journal-list button:hover {
+      background-color: #ddd;
+    }
+    .journal-entry {
+      margin-top: 20px;
+      display: none;
+    }
+    .journal-entry textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      resize: none;
+    }
+    .journal-entry button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #A17E89;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .journal-entry button:hover {
+      background-color: #8c6375;
+    }
+  </style>
+</head>
+<body>
+  <h1>Habit Tracker & Journal</h1>
+  <div class="journal-widget">
+    <div class="journal-header">
+      <input type="text" id="journal-title" placeholder="Enter page title">
+      <select id="journal-category">
+        <option value="Gratitude">Gratitude</option>
+        <option value="Shadow Work">Shadow Work</option>
+        <option value="Prompt">Prompt</option>
+        <option value="Manifesting">Manifesting</option>
+      </select>
+      <button id="create-page">Create Page</button>
+    </div>
+    <button id="view-archive">View Archive</button>
+    <div class="journal-list" id="journal-list">
+      <!-- Pages will be dynamically loaded here -->
+    </div>
+    <div class="journal-entry" id="journal-entry">
+      <textarea id="journal-content" placeholder="Write your thoughts here..."></textarea>
+      <button id="save-entry">Save Entry</button>
+    </div>
+    <div class="journal-archive" id="journal-archive" style="display: none;">
+      <h2>Journal Archive</h2>
+      <div id="archive-list"></div>
+    </div>
+  </div>
+  <script src="journal.js">const createPageButton = document.getElementById("create-page");
+const journalTitleInput = document.getElementById("journal-title");
+const journalCategorySelect = document.getElementById("journal-category");
+const journalList = document.getElementById("journal-list");
+const journalEntry = document.getElementById("journal-entry");
+const journalContent = document.getElementById("journal-content");
+const saveEntryButton = document.getElementById("save-entry");
+const viewArchiveButton = document.getElementById("view-archive");
+const journalArchive = document.getElementById("journal-archive");
+const archiveList = document.getElementById("archive-list");
+
+// LocalStorage key
+const JOURNAL_KEY = "journalPages";
+
+// Load pages from localStorage
+function loadPages() {
+  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
+  journalList.innerHTML = "";
+  Object.keys(pages).forEach(key => {
+    const button = document.createElement("button");
+    button.textContent = `${pages[key].title} (${pages[key].date})`;
+    button.addEventListener("click", () => openPage(key, pages[key]));
+    journalList.appendChild(button);
+  });
+}
+
+// Create a new page
+createPageButton.addEventListener("click", () => {
+  const title = journalTitleInput.value.trim();
+  const category = journalCategorySelect.value;
+  const date = new Date().toLocaleDateString();
+
+  if (title === "") {
+    alert("Please enter a title for your page.");
+    return;
+  }
+
+  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
+  const id = `${title}-${date}`.replace(/\s+/g, "_");
+
+  if (pages[id]) {
+    alert("A page with this title already exists for today.");
+    return;
+  }
+
+  pages[id] = { title, category, date, content: "" };
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(pages));
+  journalTitleInput.value = "";
+  loadPages();
+});
+
+// Open an existing page
+function openPage(id, page) {
+  journalEntry.style.display = "block";
+  journalContent.value = page.content;
+  journalEntry.dataset.currentId = id;
+}
+
+// Save the current entry
+saveEntryButton.addEventListener("click", () => {
+  const id = journalEntry.dataset.currentId;
+  const content = journalContent.value;
+
+  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
+  if (pages[id]) {
+    pages[id].content = content;
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(pages));
+    alert("Entry saved!");
+    journalEntry.style.display = "none";
+    journalContent.value = "";
+  }
+});
+
+// View the archive
+viewArchiveButton.addEventListener("click", () => {
+  const pages = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || {};
+  journalArchive.style.display = "block";
+  archiveList.innerHTML = "";
+
+  // Group pages by month
+  const groupedByMonth = {};
+  Object.keys(pages).forEach(id => {
+    const month = pages[id].date.split("/")[1]; // Extract month from date
+    if (!groupedByMonth[month]) groupedByMonth[month] = [];
+    groupedByMonth[month].push(pages[id]);
+  });
+
+  // Display months
+  Object.keys(groupedByMonth).forEach(month => {
+    const monthDiv = document.createElement("div");
+    monthDiv.innerHTML = `<h3>Month: ${month}</h3>`;
+    groupedByMonth[month].forEach(page => {
+      const pageButton = document.createElement("button");
+      pageButton.textContent = `${page.title} (${page.category})`;
+      pageButton.addEventListener("click", () => openPage(page.title, page));
+      monthDiv.appendChild(pageButton);
+    });
+    archiveList.appendChild(monthDiv);
+  });
+});
+
+// Initialize the widget
+loadPages();
+</script>
+</body>
+</html>
