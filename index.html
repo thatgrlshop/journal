@@ -56,10 +56,12 @@
       resize: none;
     }
     .navigation {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 20px; /* Aggiunge spazio tra i pulsanti */
+}
     .navigation button {
       padding: 10px 20px;
       background-color: #A17E89;
@@ -115,33 +117,22 @@
       color: #A17E89;
     }
     .save-button {
-  text-align: center;
-  margin-top: 10px;
+  flex: 1; /* Occupa spazio centrale per allinearsi */
+  text-align: center; /* Centra il pulsante Save */
 }
 
 .save-button button {
   padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
+  background-color: white;
+  color: #A17E89; /* Colore testo uguale agli altri */
+  border: 2px solid #A17E89;
   border-radius: 5px;
   cursor: pointer;
 }
 
 .save-button button:hover {
-  background-color: #45a049;
-}
-    .save-button button {
-  padding: 10px 20px;
-  background-color: white;
-  color: #A17E89; /* Stesso colore del background degli altri pulsanti */
-  border: 2px solid #A17E89;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.save-button button:hover {
   background-color: #f9f9f9;
-  color: #8c6375; /* Stesso colore dell'hover degli altri pulsanti */
+  color: #8c6375; /* Colore hover uguale agli altri */
   border-color: #8c6375;
 }
   </style>
