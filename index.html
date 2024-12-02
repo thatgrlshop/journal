@@ -135,6 +135,14 @@
   color: #8c6375; /* Colore hover uguale agli altri */
   border-color: #8c6375;
 }
+ .saved-day {
+  background-color: #A17E89;
+  color: white;
+  border-radius: 50%;
+}
+.saved-day:hover {
+  background-color: #8c6375;
+}
   </style>
 </head>
 <body>
@@ -210,40 +218,55 @@
       currentDateElement.textContent = `Date: ${currentDate.toDateString()}`;
     };
 
+  // Funzione per ottenere i giorni salvati
+  const getSavedDays = () => {
+    const savedPages = JSON.parse(localStorage.getItem("diaryPages")) || {};
+    return Object.keys(savedPages).filter((dateKey) => {
+      const page = savedPages[dateKey];
+      return page.title || page.content; // Giorni con titolo o contenuto
+    });
+  };
+
+  
     const generateCalendar = () => {
-      const year = currentCalendarDate.getFullYear();
-      const month = currentCalendarDate.getMonth();
-      const firstDayIndex = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      calendarTable.innerHTML = "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>";
-      let row = "<tr>";
+  const savedDays = getSavedDays(); // Ottieni i giorni salvati
+  calendarTable.innerHTML = "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>";
+  let row = "<tr>";
 
-      for (let i = 0; i < firstDayIndex; i++) {
-        row += "<td></td>";
-      }
+  for (let i = 0; i < firstDayIndex; i++) {
+    row += "<td></td>";
+  }
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const currentDay = new Date(year, month, day);
-        row += `<td>${day}</td>`;
-        if ((firstDayIndex + day) % 7 === 0) {
-          row += "</tr><tr>";
-        }
-      }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const currentDay = new Date(year, month, day);
+    const formattedDate = formatDate(currentDay);
 
-      row += "</tr>";
-      calendarTable.innerHTML += row;
+    const isSaved = savedDays.includes(formattedDate); // Controlla se il giorno è salvato
+    row += `<td class="${isSaved ? 'saved-day' : ''}">${day}</td>`;
 
-      calendarTable.querySelectorAll("td").forEach((cell) => {
-        if (cell.textContent) {
-          cell.addEventListener("click", () => {
-            currentDate = new Date(year, month, cell.textContent);
-            loadPage();
-            calendar.style.display = "none";
-          });
-        }
+    if ((firstDayIndex + day) % 7 === 0) {
+      row += "</tr><tr>";
+    }
+  }
+
+  row += "</tr>";
+  calendarTable.innerHTML += row;
+
+  calendarTable.querySelectorAll("td").forEach((cell) => {
+    if (cell.textContent) {
+      cell.addEventListener("click", () => {
+        currentDate = new Date(year, month, cell.textContent);
+        loadPage();
+        calendar.style.display = "none";
       });
-    };
+    }
+  });
+};
 
     prevDayButton.addEventListener("click", () => {
       savePage();
